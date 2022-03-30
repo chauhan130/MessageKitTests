@@ -31,13 +31,23 @@ import Kingfisher
 final class AdvancedExampleViewController: ChatViewController {
         
     let outgoingAvatarOverlap: CGFloat = 17.5
-    
+    let typingQueue = DispatchQueue(label: "com.test.typing")
     override func viewDidLoad() {
         messagesCollectionView = MessagesCollectionView(frame: .zero, collectionViewLayout: CustomMessagesFlowLayout())
         messagesCollectionView.register(CustomCell.self)
         super.viewDidLoad()
         
         updateTitleView(title: "MessageKit", subtitle: "2 Online")
+
+        typingQueue.async {
+            while true {
+                let seconds = (arc4random() % 3) + 1
+                Thread.sleep(forTimeInterval: TimeInterval(seconds))
+                DispatchQueue.main.async {
+                    self.setTypingIndicatorViewHidden(!self.messagesCollectionView.isTypingIndicatorHidden)
+                }
+            }
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -45,11 +55,11 @@ final class AdvancedExampleViewController: ChatViewController {
         
         MockSocket.shared.connect(with: [SampleData.shared.nathan, SampleData.shared.wu])
             .onTypingStatus { [weak self] in
-                self?.setTypingIndicatorViewHidden(false)
+//                self?.setTypingIndicatorViewHidden(false)
             }.onNewMessage { [weak self] message in
-                self?.setTypingIndicatorViewHidden(true, performUpdates: {
+//                self?.setTypingIndicatorViewHidden(true, performUpdates: {
                     self?.insertMessage(message)
-                })
+//                })
         }
     }
     
